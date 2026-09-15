@@ -10,6 +10,7 @@ import About from './pages/About';
 import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import Cart from './pages/Cart';
+import NotFound from './pages/NotFound';
 
 import ProtectedAdminRoute from './admin/ProtectedAdminRoute';
 import AdminLayout from './admin/AdminLayout';
@@ -37,6 +38,7 @@ function App() {
                   <Route path="/reyler" element={<Reviews />} />
                   <Route path="/elaqe" element={<Contact />} />
                   <Route path="/sebet" element={<Cart />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
 
                 <Route path="/admin/login" element={<AdminLogin />} />
@@ -50,6 +52,7 @@ function App() {
                     <Route path="orders" element={<OrdersAdmin />} />
                     <Route path="reviews" element={<ReviewsAdmin />} />
                     <Route path="messages" element={<MessagesAdmin />} />
+                    <Route path="*" element={<Navigate to="dashboard" replace />} />
                   </Route>
                 </Route>
               </Routes>

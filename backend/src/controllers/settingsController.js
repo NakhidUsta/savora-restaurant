@@ -23,10 +23,18 @@ exports.getSettings = async (req, res) => {
   }
 };
 
+const ALLOWED_SETTING_KEYS = [
+  'site_name', 'logo_url', 'phone', 'email', 'address', 'is_saatlari',
+  'hero_title', 'hero_description', 'instagram_link', 'facebook_link',
+];
+
 exports.updateSetting = async (req, res) => {
   const { key } = req.params;
   const { value } = req.body;
 
+  if (!ALLOWED_SETTING_KEYS.includes(key)) {
+    return res.status(400).json({ error: 'Naməlum ayar açarı' });
+  }
   if (value === undefined) {
     return res.status(400).json({ error: 'value sahəsi tələb olunur' });
   }
@@ -48,10 +56,15 @@ exports.updateSetting = async (req, res) => {
   }
 };
 
+const ALLOWED_IMAGE_SECTIONS = ['hero_background', 'about_image'];
+
 exports.updateImage = async (req, res) => {
   const { sectionKey } = req.params;
   const { image_url, alt_text } = req.body;
 
+  if (!ALLOWED_IMAGE_SECTIONS.includes(sectionKey)) {
+    return res.status(400).json({ error: 'Naməlum şəkil bölməsi' });
+  }
   if (!image_url) {
     return res.status(400).json({ error: 'image_url sahəsi tələb olunur' });
   }

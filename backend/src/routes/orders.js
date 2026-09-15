@@ -5,7 +5,7 @@ const { requireAdmin } = require('../middleware/auth');
 
 router.post('/', orderController.createOrder);
 router.get('/', requireAdmin, orderController.getAllOrders);
-router.get('/:id', orderController.getOrderById);
+router.get('/:id', requireAdmin, orderController.getOrderById);
 router.put('/:id', requireAdmin, orderController.updateOrderStatus);
 
 module.exports = router;

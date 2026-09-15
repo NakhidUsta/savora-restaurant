@@ -1,39 +1,36 @@
-import { createContext, useContext, useState } from 'react';
-import { login as loginRequest } from '../api/auth';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { login as loginRequest, logout as logoutRequest, me as meRequest } from '../api/auth';
 
 const AuthContext = createContext(null);
-const TOKEN_KEY = 'savora_admin_token';
-const ADMIN_KEY = 'savora_admin_info';
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
-  const [admin, setAdmin] = useState(() => {
-    try {
-      const raw = localStorage.getItem(ADMIN_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [admin, setAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Səhifə yenilənəndə (F5) httpOnly cookie hələ də brauzerdədirsə, sessiyanı bərpa edirik.
+    meRequest()
+      .then((data) => setAdmin(data.admin))
+      .catch(() => setAdmin(null))
+      .finally(() => setLoading(false));
+  }, []);
 
   const login = async (email, password) => {
     const data = await loginRequest(email, password);
-    localStorage.setItem(TOKEN_KEY, data.token);
-    localStorage.setItem(ADMIN_KEY, JSON.stringify(data.admin));
-    setToken(data.token);
     setAdmin(data.admin);
     return data;
   };
 
-  const logout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(ADMIN_KEY);
-    setToken(null);
-    setAdmin(null);
+  const logout = async () => {
+    try {
+      await logoutRequest();
+    } finally {
+      setAdmin(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ token, admin, isAuthenticated: Boolean(token), login, logout }}>
+    <AuthContext.Provider value={{ admin, loading, isAuthenticated: Boolean(admin), login, logout }}>
       {children}
     </AuthContext.Provider>
   );

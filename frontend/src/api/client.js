@@ -5,23 +5,15 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('savora_admin_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  withCredentials: true, // httpOnly admin cookie-sini avtomatik göndərmək üçün
 });
 
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isLoginRequest = error.config?.url?.includes('/auth/login');
-    if (error.response?.status === 401 && !isLoginRequest && localStorage.getItem('savora_admin_token')) {
-      localStorage.removeItem('savora_admin_token');
-      localStorage.removeItem('savora_admin_info');
+    const url = error.config?.url || '';
+    const isAuthCheck = url.includes('/auth/login') || url.includes('/auth/me');
+    if (error.response?.status === 401 && !isAuthCheck) {
       if (!window.location.pathname.startsWith('/admin/login')) {
         window.location.href = '/admin/login';
       }

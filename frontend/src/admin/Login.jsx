@@ -4,12 +4,16 @@ import Button from '../components/Button';
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  if (loading) {
+    return null;
+  }
 
   if (isAuthenticated) {
     return <Navigate to="/admin/dashboard" replace />;
@@ -38,6 +42,7 @@ function Login() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"
+            required
             placeholder="E-poçt"
             value={form.email}
             onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
@@ -45,6 +50,7 @@ function Login() {
           />
           <input
             type="password"
+            required
             placeholder="Şifrə"
             value={form.password}
             onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}

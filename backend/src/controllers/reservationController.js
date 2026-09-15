@@ -30,6 +30,25 @@ exports.createReservation = async (req, res) => {
 
   try {
     const pool = await poolPromise;
+
+    if (table_number) {
+      const overlap = await pool.request()
+        .input('date', sql.Date, date)
+        .input('time', sql.VarChar(8), time)
+        .input('table_number', sql.Int, table_number)
+        .query(`
+          SELECT id FROM reservations
+          WHERE table_number = @table_number
+            AND [date] = @date
+            AND status <> N'ləğv edildi'
+            AND ABS(DATEDIFF(MINUTE, [time], CAST(@time AS TIME))) < 120
+        `);
+
+      if (overlap.recordset.length > 0) {
+        return res.status(409).json({ error: 'Bu masa seçilmiş vaxt üçün artıq rezerv olunub' });
+      }
+    }
+
     const result = await pool.request()
       .input('name', sql.NVarChar(120), name)
       .input('phone', sql.NVarChar(30), phone)

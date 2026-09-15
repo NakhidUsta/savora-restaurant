@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const { poolPromise } = require('./config/db');
@@ -17,8 +18,9 @@ const adminRoutes = require('./routes/admin');
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173' }));
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173', credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Ümumi sorğu limiti — sui-istifadə/flood hücumlarına qarşı (bütün /api yollarına)
@@ -48,7 +50,8 @@ app.get('/api/health', async (req, res) => {
     await pool.request().query('SELECT 1 AS ok');
     res.json({ status: 'ok', database: 'qoşulub' });
   } catch (err) {
-    res.status(500).json({ status: 'xəta', database: 'qoşulmayıb', error: err.message });
+    console.error('Health check DB xətası:', err.message);
+    res.status(500).json({ status: 'xəta', database: 'qoşulmayıb' });
   }
 });
 
